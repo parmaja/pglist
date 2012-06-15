@@ -19,6 +19,16 @@ require_once(DOKU_INC.'inc/search.php');
  */
 class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
+  function getInfo(){
+        return array(
+            'author' => 'Zaher Dirkey',
+            'email'  => 'zaherdirkey@yahoo.com',
+            'date'   => '2012-06-4',
+            'name'   => 'Page List Plugin',
+            'desc'   => 'List pages of namespace based on nslist.',
+            'url'    => 'http://dokuwiki.org/plugin:pglist',
+        );
+    }
     /**
      * What kind of syntax are we?
      */
@@ -59,6 +69,10 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         $conf = array(
             'ns'    => getNS($ID),
             'depth' => 1,
+            'dirs' => 0,
+            'files' => 0,
+            'me' => 0,
+            'nostart' => 0,
             'date'  => 0,
             'dsort' => 0
         );
@@ -66,10 +80,15 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         list($ns,$params) = explode(' ',$match,2);
         $ns = cleanID($ns);
 
-        if(preg_match('/\bdate\b/i',$params))  $conf['date'] = 1;
+        if(preg_match('/\bdirs\b/i',$params)) $conf['dirs'] = 1;
+        if(preg_match('/\bfiles\b/i',$params)) $conf['files'] = 1;
+        if(preg_match('/\bme\b/i',$params)) $conf['me'] = 1;
+        if(preg_match('/\bnostart\b/i',$params))  $conf['nostart'] = 1;
+        if(preg_match('/\bdate\b/i',$params)) $conf['date'] = 1;
         if(preg_match('/\bdsort\b/i',$params)) $conf['dsort'] = 1;
-        if(preg_match('/\b(\d+)\b/i',$params,$m))   $conf['depth'] = $m[1];
-        if($ns) $conf['ns'] = $ns;
+        if(preg_match('/\b(\d+)\b/i',$params,$m)) $conf['depth'] = $m[1];
+
+        if ($ns) $conf['ns'] = $ns;
 
         $conf['dir'] = str_replace(':','/',$conf['ns']);
 
@@ -83,6 +102,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
     function render($format, &$R, $data) {
         global $conf;
         global $lang;
+        global $ID;
         if($format != 'xhtml') return false;
 
 
@@ -94,6 +114,14 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
             'firsthead' => true,
             'meta'      => true
         );
+
+        if($data['dirs']) {
+         	$opts['listdirs'] = true;
+	        if ($data['files'])
+	          $opts['listfiles'] = true;
+          else
+          	$opts['listfiles'] = false;
+        }
 
         // read the directory
         $result = array();
@@ -107,13 +135,27 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
         $R->listu_open();
         foreach($result as $item) {
-        	if ($item['file'] != $conf['start'].'.txt')
+        	$skip_it = false;
+          if ($data['nostart'] and ($item['file'] == $conf['start'].'.txt'))
+	        	$skip_it = true;
+
+          if (!$data['me'] and ($item['id'] == $ID))
+	        	$skip_it = true;
+
+          if ($item['type']=='d') {
+            $P = resolve_id($item['id'], $conf['start'], false);
+            if(!page_exists($page.$conf['start']))
+		          $skip_it = true;
+          } else
+	          $P = ':'.$item['id'];
+
+        	if (!$skip_it)
           {
             $R->listitem_open(1);
             $R->listcontent_open();
-            $R->internallink(':'.$item['id']);
-            if($data['date']) $R->cdata(' '.dformat($item['mtime']));
-
+            $R->internallink($P);
+            if($data['date'])
+            	$R->cdata(' '.dformat($item['mtime']));
             $R->listcontent_close();
             $R->listitem_close();
           }
@@ -124,15 +166,19 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
     }
 
     function _sort_page($a,$b){
+			$r = strcmp($a['type'],$b['type']);
+      if ($r<>0)
+        return $r;
+      else
         return strcmp($a['id'],$b['id']);
     }
 
-    function _sort_date($a,$b){
-        if($b['mtime'] < $a['mtime']){
+    function _sort_date($a,$b) {
+        if ($b['mtime'] < $a['mtime']) {
             return -1;
-        }elseif($b['mtime'] > $a['mtime']){
+        } elseif($b['mtime'] > $a['mtime']) {
             return 1;
-        }else{
+        } else {
             return strcmp($a['id'],$b['id']);
         }
     }
