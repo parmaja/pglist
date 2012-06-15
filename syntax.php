@@ -148,7 +148,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
           if ($item['type']=='d') {
             $P = resolve_id($item['id'], $conf['start'], false);
-            if(!page_exists($page.$conf['start']))
+            if(!page_exists($P))
 		          $skip_it = true;
           } else
 	          $P = ':'.$item['id'];
