@@ -74,6 +74,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
             'me' => 0,
             'nostart' => 0,
             'date'  => 0,
+            'fsort' => 0,
             'dsort' => 0
         );
 
@@ -85,6 +86,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         if(preg_match('/\bme\b/i',$params)) $conf['me'] = 1;
         if(preg_match('/\bnostart\b/i',$params))  $conf['nostart'] = 1;
         if(preg_match('/\bdate\b/i',$params)) $conf['date'] = 1;
+        if(preg_match('/\bfsort\b/i',$params)) $conf['fsort'] = 1;
         if(preg_match('/\bdsort\b/i',$params)) $conf['dsort'] = 1;
         if(preg_match('/\b(\d+)\b/i',$params,$m)) $conf['depth'] = $m[1];
 
@@ -125,9 +127,11 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
         // read the directory
         $result = array();
-        search(&$result,$conf['datadir'],'search_universal',$opts,$data['dir']);
+        search($result,$conf['datadir'],'search_universal',$opts,$data['dir']);
 
-        if($data['dsort']){
+        if($data['fsort']){
+            usort($result,array($this,'_sort_file'));
+        }elseif($data['dsort']){
             usort($result,array($this,'_sort_date'));
         }else{
             usort($result,array($this,'_sort_page'));
@@ -171,6 +175,14 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         return $r;
       else
         return strcmp($a['id'],$b['id']);
+    }
+
+    function _sort_file($a,$b){
+			$r = strcmp($a['type'],$b['type']);
+      if ($r<>0)
+        return $r;
+      else
+        return strcmp($a['file'],$b['file']);
     }
 
     function _sort_date($a,$b) {
