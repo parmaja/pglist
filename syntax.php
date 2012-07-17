@@ -73,6 +73,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
             'files' => 0,
             'me' => 0,
             'nostart' => 0,
+            'any' => 0,
             'date'  => 0,
             'fsort' => 0,
             'dsort' => 0
@@ -84,6 +85,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         if(preg_match('/\bdirs\b/i',$params)) $conf['dirs'] = 1;
         if(preg_match('/\bfiles\b/i',$params)) $conf['files'] = 1;
         if(preg_match('/\bme\b/i',$params)) $conf['me'] = 1;
+        if(preg_match('/\bany\b/i',$params)) $conf['any'] = 1;
         if(preg_match('/\bnostart\b/i',$params))  $conf['nostart'] = 1;
         if(preg_match('/\bdate\b/i',$params)) $conf['date'] = 1;
         if(preg_match('/\bfsort\b/i',$params)) $conf['fsort'] = 1;
@@ -148,7 +150,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
           if ($item['type']=='d') {
             $P = resolve_id($item['id'], $conf['start'], false);
-            if(!page_exists($P))
+            if (!$data['any'] and !page_exists($P))
 		          $skip_it = true;
           } else
 	          $P = ':'.$item['id'];
