@@ -110,8 +110,8 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         global $conf;
         global $lang;
         global $ID;
-        if($format != 'xhtml') return false;
-
+        if($format != 'xhtml')
+        	return false;
 
         $opts = array(
             'depth'     => $data['depth'],
@@ -142,16 +142,18 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
             usort($result,array($this,'_sort_page'));
         }
 
+        $start = cleanID($data['ns'].':'.$conf['start']);
+
         $R->listu_open();
         foreach($result as $item) {
         	$skip_it = false;
           if ($data['nostart'] and ($item['file'] == $conf['start'].'.txt'))
 	        	$skip_it = true;
-
-          if (!$data['me'] and ($item['id'] == $ID))
+          else if (!$data['me'] and ($item['id'] == $start))
 	        	$skip_it = true;
-
-          if ($item['type']=='d') {
+          else if (isHiddenPage($item['id']))
+  					$skip_it = true;
+          else if ($item['type']=='d') {
             $P = resolve_id($item['id'], $conf['start'], false);
             if (!$data['any'] and !page_exists($P))
 		          $skip_it = true;
