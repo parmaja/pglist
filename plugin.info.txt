@@ -5,3 +5,4 @@ date   2012-06-04
 name   Namespace Listing
 desc   List all pages in a given namespace
 url    http://www.dokuwiki.org/plugin:pglist
+source http://www.github.com/parmaja/pglist

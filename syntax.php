@@ -64,7 +64,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
      */
     function handle($match, $state, $pos, &$handler){
         global $ID;
-        $match = substr($match,9,-2); //strip {{pglist> from start and }} from end
+        $match = substr($match, 9, -2); //strip {{pglist> from start and }} from end
 
         $conf = array(
             'ns'    => getNS($ID),
@@ -80,8 +80,13 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         );
 
         list($ns,$params) = explode(' ',$match,2);
-        $ns = cleanID($ns);
 
+        if ($ns) {
+        	if ($ns[0] === '/')
+	        	$conf['ns'] = cleanID($ns);
+          else
+	          $conf['ns'] = cleanID(getNS($ID).'/'.$ns);
+        }
         if(preg_match('/\bdirs\b/i',$params)) $conf['dirs'] = 1;
         if(preg_match('/\bfiles\b/i',$params)) $conf['files'] = 1;
         if(preg_match('/\bme\b/i',$params)) $conf['me'] = 1;
@@ -91,8 +96,6 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         if(preg_match('/\bfsort\b/i',$params)) $conf['fsort'] = 1;
         if(preg_match('/\bdsort\b/i',$params)) $conf['dsort'] = 1;
         if(preg_match('/\b(\d+)\b/i',$params,$m)) $conf['depth'] = $m[1];
-
-        if ($ns) $conf['ns'] = $ns;
 
         $conf['dir'] = str_replace(':','/',$conf['ns']);
 
