@@ -25,43 +25,43 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
             'email'  => 'zaherdirkey@yahoo.com',
             'date'   => '2012-06-4',
             'name'   => 'Page List Plugin',
-            'desc'   => 'List pages of namespace based on nslist.',
+            'desc'   => 'List pages of namespace, based on nslist.',
             'url'    => 'http://dokuwiki.org/plugin:pglist',
         );
     }
-    /**
-     * What kind of syntax are we?
-     */
+/**
+ * What kind of syntax are we?
+ */
     function getType(){
         return 'substition';
     }
 
-    /**
-     * What about paragraphs?
-     */
+/**
+ * What about paragraphs?
+ */
     function getPType(){
         return 'block';
     }
 
-    /**
-     * Where to sort in?
-     */
+/**
+ * Where to sort in?
+ */
     function getSort(){
         return 302;
     }
 
 
-    /**
-     * Connect pattern to lexer
-     */
+/**
+ * Connect pattern to lexer
+ */
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('{{pglist>[^}]*}}',$mode,'plugin_pglist');
     }
 
 
-    /**
-     * Handle the match
-     */
+/**
+ * Handle the match
+ */
     function handle($match, $state, $pos, &$handler){
         global $ID;
         $match = substr($match, 9, -2); //strip {{pglist> from start and }} from end
@@ -72,6 +72,8 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
             'dirs' => 0,
             'files' => 0,
             'me' => 0,
+            'sibling' => 0, //todo
+//            'same' => 0, /** If there is a dir have the same name of the file make it as namespace **/
             'nostart' => 0,
             'any' => 0,
             'date'  => 0,
@@ -79,17 +81,23 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
             'dsort' => 0
         );
 
-        list($ns,$params) = explode(' ',$match,2);
+        list($ns, $params) = explode(' ', $match, 2);
 
         if ($ns) {
-        	if ($ns[0] === '/')
-	        	$conf['ns'] = cleanID($ns);
+          if ($ns === '*') {
+            $conf['ns'] = cleanID($ID);
+          }
+          else if ($ns[0] === '/')
+            $conf['ns'] = cleanID($ns);
           else
-	          $conf['ns'] = cleanID(getNS($ID).'/'.$ns);
+            $conf['ns'] = cleanID('/'.getNS($ID).'/'.$ns);
         }
+
         if(preg_match('/\bdirs\b/i',$params)) $conf['dirs'] = 1;
         if(preg_match('/\bfiles\b/i',$params)) $conf['files'] = 1;
         if(preg_match('/\bme\b/i',$params)) $conf['me'] = 1;
+        if(preg_match('/\bsibling\b/i',$params)) $conf['sibling'] = 1;
+        if(preg_match('/\bsame\b/i',$params)) $conf['same'] = 1;
         if(preg_match('/\bany\b/i',$params)) $conf['any'] = 1;
         if(preg_match('/\bnostart\b/i',$params))  $conf['nostart'] = 1;
         if(preg_match('/\bdate\b/i',$params)) $conf['date'] = 1;
@@ -103,15 +111,15 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         return $conf;
     }
 
-    /**
-     * Create output
-     */
+/**
+ * Create output
+ */
     function render($format, &$R, $data) {
         global $conf;
         global $lang;
         global $ID;
         if($format != 'xhtml')
-        	return false;
+          return false;
 
         $opts = array(
             'depth'     => $data['depth'],
@@ -123,16 +131,16 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         );
 
         if($data['dirs']) {
-         	$opts['listdirs'] = true;
-	        if ($data['files'])
-	          $opts['listfiles'] = true;
+           $opts['listdirs'] = true;
+          if ($data['files'])
+            $opts['listfiles'] = true;
           else
-          	$opts['listfiles'] = false;
+            $opts['listfiles'] = false;
         }
 
         // read the directory
         $result = array();
-        search($result,$conf['datadir'],'search_universal',$opts,$data['dir']);
+        search($result, $conf['datadir'], 'search_universal', $opts, $data['dir']);
 
         if($data['fsort']){
             usort($result,array($this,'_sort_file'));
@@ -146,27 +154,27 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
         $R->listu_open();
         foreach($result as $item) {
-        	$skip_it = false;
+          $skip_it = false;
           if ($data['nostart'] and ($item['file'] == $conf['start'].'.txt'))
-	        	$skip_it = true;
-          else if (!$data['me'] and ($item['id'] == $start))
-	        	$skip_it = true;
+            $skip_it = true;
+          else if (!$data['me'] and ($item['id'] == $ID))
+            $skip_it = true;
           else if (isHiddenPage($item['id']))
-  					$skip_it = true;
+            $skip_it = true;
           else if ($item['type']=='d') {
             $P = resolve_id($item['id'], $conf['start'], false);
             if (!$data['any'] and !page_exists($P))
-		          $skip_it = true;
+              $skip_it = true;
           } else
-	          $P = ':'.$item['id'];
+            $P = ':'.$item['id'];
 
-        	if (!$skip_it)
+          if (!$skip_it)
           {
             $R->listitem_open(1);
             $R->listcontent_open();
             $R->internallink($P);
             if($data['date'])
-            	$R->cdata(' '.dformat($item['mtime']));
+              $R->cdata(' '.dformat($item['mtime']));
             $R->listcontent_close();
             $R->listitem_close();
           }
@@ -177,7 +185,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
     }
 
     function _sort_page($a,$b){
-			$r = strcmp($a['type'],$b['type']);
+      $r = strcmp($a['type'],$b['type']);
       if ($r<>0)
         return $r;
       else
@@ -185,7 +193,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
     }
 
     function _sort_file($a,$b){
-			$r = strcmp($a['type'],$b['type']);
+      $r = strcmp($a['type'],$b['type']);
       if ($r<>0)
         return $r;
       else
@@ -203,5 +211,3 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
     }
 
 }
-
-//Setup VIM: ex: et ts=4 enc=utf-8 :
