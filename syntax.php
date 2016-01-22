@@ -62,7 +62,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 /**
  * Handle the match
  */
-    function handle($match, $state, $pos, &$handler){
+    function handle($match, $state, $pos, Doku_Handler $handler){
         global $ID;
         $match = substr($match, 9, -2); //strip {{pglist> from start and }} from end
 
@@ -114,7 +114,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 /**
  * Create output
  */
-    function render($format, &$R, $data) {
+    function render($format, Doku_Renderer $R, $data) {
         global $conf;
         global $lang;
         global $ID;
