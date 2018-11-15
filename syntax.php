@@ -114,7 +114,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 /**
  * Create output
  */
-    function render($format, &$R, $data) {
+    function render($format, Doku_Renderer $renderer, $data) {
         global $conf;
         global $lang;
         global $ID;
