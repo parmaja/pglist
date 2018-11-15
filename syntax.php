@@ -23,7 +23,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
         return array(
             'author' => 'Zaher Dirkey',
             'email'  => 'zaherdirkey@yahoo.com',
-            'date'   => '2012-06-4',
+            'date'   => '2018-11-16',
             'name'   => 'Page List Plugin',
             'desc'   => 'List pages of namespace, based on nslist.',
             'url'    => 'http://dokuwiki.org/plugin:pglist',
@@ -62,7 +62,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 /**
  * Handle the match
  */
-    function handle($match, $state, $pos, &$handler){
+    function handle($match, $state, $pos, Doku_Handler $handler){
         global $ID;
         $match = substr($match, 9, -2); //strip {{pglist> from start and }} from end
 
