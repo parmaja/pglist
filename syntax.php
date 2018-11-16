@@ -152,7 +152,7 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
         $start = cleanID($data['ns'].':'.$conf['start']);
 
-        $R->listu_open();
+        $renderer->listu_open();
         foreach($result as $item) {
           $skip_it = false;
           if ($data['nostart'] and ($item['file'] == $conf['start'].'.txt'))
@@ -170,16 +170,16 @@ class syntax_plugin_pglist extends DokuWiki_Syntax_Plugin {
 
           if (!$skip_it)
           {
-            $R->listitem_open(1);
-            $R->listcontent_open();
-            $R->internallink($P);
+            $renderer->listitem_open(1);
+            $renderer->listcontent_open();
+            $renderer->internallink($P);
             if($data['date'])
-              $R->cdata(' '.dformat($item['mtime']));
-            $R->listcontent_close();
-            $R->listitem_close();
+              $renderer->cdata(' '.dformat($item['mtime']));
+            $renderer->listcontent_close();
+            $renderer->listitem_close();
           }
         }
-        $R->listu_close();
+        $renderer->listu_close();
 
         return true;
     }
