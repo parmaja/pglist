@@ -1,7 +1,7 @@
 base   pglist
 author Zaher Dirkey
 email  zaherdirkey@yahoo.com
-date   2018-11-16
+date   2020-01-09
 name   Namespace Listing
 desc   List all pages in a given namespace
 url    http://www.dokuwiki.org/plugin:pglist
