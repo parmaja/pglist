@@ -14,6 +14,17 @@ require_once(DOKU_PLUGIN.'action.php');
 
 class action_plugin_pglist extends DokuWiki_Action_Plugin {
 
+    function getInfo(){
+        return array(
+            'author' => 'Zaher Dirkey',
+            'email'  => 'zaherdirkey@yahoo.com',
+            'date'   => '2020-11-15',
+            'name'   => 'Page List Plugin',
+            'desc'   => 'List pages of namespace, based on nslist.',
+            'url'    => 'http://dokuwiki.org/plugin:pglist',
+        );
+    }
+
     function register(Doku_Event_Handler $controller) {
         $controller->register_hook("TOOLBAR_DEFINE", "AFTER", $this, "insert_button", array ());
     }
